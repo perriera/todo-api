@@ -13,7 +13,10 @@ app.get('/', function (req,res) {
 });
 
 app.get('/todos', function (req,res) {
-	res.json(todos);
+	var queryParams = req.query;
+	var filtered = todos;
+
+	res.json(filtered);
 });
 
 app.get('/todos/:id', function (req,res) {
