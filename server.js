@@ -16,38 +16,69 @@ app.get('/', function(req, res) {
 });
 
 app.get('/todos', function(req, res) {
-	var queryParams = req.query;
-	var filteredTodos = todos;
+	db.Todo.findAll().then(function(todos) {
+		if (todos) {
+			var rep = '';
+			todos.forEach(function(todo) {
+				rep += ' '+todo.toJSON();
+				console.log(todo.toJSON());
+			})
+			res.json(rep);
+			return 
+		} else {
+			console.log('no todo found');
+			res.status(400).json('empty set');
+		}
+	} ).catch(function(e) {
+		res.status(400).json(e);
+		console.log('Finished');
+		console.log(e);
+	});
+	// var queryParams = req.query;
+	// var filteredTodos = todos;
 
-	if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-		filteredTodos = _.where(filteredTodos, {
-			completed: true
-		});
-	} else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
-		filteredTodos = _.where(filteredTodos, {
-			completed: false
-		});
-	}
+	// if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
+	// 	filteredTodos = _.where(filteredTodos, {
+	// 		completed: true
+	// 	});
+	// } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
+	// 	filteredTodos = _.where(filteredTodos, {
+	// 		completed: false
+	// 	});
+	// }
 
-	if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-		filteredTodos = _.filter(filteredTodos, function(todo) {
-			return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
-		});
-	}
+	// if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
+	// 	filteredTodos = _.filter(filteredTodos, function(todo) {
+	// 		return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+	// 	});
+	// }
 
-	res.json(filteredTodos);
+	// res.json(filteredTodos);
 });
 
 app.get('/todos/:id', function(req, res) {
 	var todoid = parseInt(req.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {
-		id: todoid
+	db.todo.findById(todoid).then(function(todo) {
+		if (todo) {
+			res.json(todo.toJSON());
+			console.log(todo.toJSON());
+		} else {
+			res.status(400).json('no todo found');
+			console.log('no todo found');
+		}
+	} ).catch(function(e) {
+		res.status(400).json(e);
+		console.log('Finished');
+		console.log(e);
 	});
-	if (matchedTodo) {
-		res.json(matchedTodo);
-	} else {
-		res.status(404).send();
-	}
+	// var matchedTodo = _.findWhere(todos, {
+	// 	id: todoid
+	// });
+	// if (matchedTodo) {
+	// 	res.json(matchedTodo);
+	// } else {
+	// 	res.status(404).send();
+	// }
 });
 
 app.post('/todos', function(req, res) {
