@@ -57,7 +57,7 @@ app.get('/todos/:id', function(req, res) {
 			console.log('no todo found');
 		}
 	} ).catch(function(e) {
-		res.status(400).json(e);
+		res.status(404).json(e);
 		console.log('Finished');
 		console.log(e);
 	});
@@ -111,7 +111,7 @@ app.delete('/todos/:id', function(req, res) {
 			res.json(todo.toJSON());
 			console.log(todo.toJSON());
 		} else {
-			res.status(400).json('no todo found');
+			res.status(404).json('no todo found');
 			console.log('no todo found');
 		}
 	} ).catch(function(e) {
@@ -123,30 +123,33 @@ app.delete('/todos/:id', function(req, res) {
 
 app.put('/todos/:id', function(req, res) {
 	var todoid = parseInt(req.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {
-		id: todoid
-	});
 	var body = _.pick(req.body, 'description', 'completed');
-	var validAttributes = {};
+	var attributes = {};
 
-	if (!matchedTodo) {
-		res.status(404).send();
-	}
+	if (body.hasOwnProperty('completed')) {
+		attributes.completed = body.completed;
+	} 
 
-	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
-		validAttributes.completed = body.completed;
-	} else if (body.hasOwnProperty('completed')) {
-		return res.staus(400).send();
-	}
+	if (body.hasOwnProperty('description')) {
+		attributes.description = body.description;
+	} 
 
-	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-		validAttributes.description = body.description;
-	} else if (body.hasOwnProperty('description')) {
-		return res.staus(400).send();
-	}
-
-	_.extend(matchedTodo, validAttributes);
-	res.json(matchedTodo);
+	db.todo.findById(todoid).then(function(todo) {
+		if (todo) {
+			todo.update(attributes).then(function(todo) {
+				res.json(todo.toJSON());
+			}, function(e) {
+				res.status(400).json(e);
+			});
+		} else {
+			res.status(404).json('no todo found');
+			console.log('no todo found');
+		}
+	}).catch(function(e) {
+		res.status(400).json(e);
+		console.log('Finished');
+		console.log(e);
+	});
 
 });
 
