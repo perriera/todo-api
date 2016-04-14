@@ -13,24 +13,9 @@ if ( env === 'production' ) {
 }
 var db = {};
 
-var Todo = sequelize.define('todo', {
-	description: {
-		type: Sequelize.STRING,
-		allowNull: false,
-		validate: {
-			len: [1,250]
-		}
-	},
-	completed: {
-		type: Sequelize.BOOLEAN,
-		allowNull: false,
-		defaultValue: false
-	}
-});
-
 db.todo = sequelize.import(__dirname + '/models/todo.js');
+db.user = sequelize.import(__dirname + '/models/user.js');
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
-db.Todo = Todo;
 
 module.exports = db;

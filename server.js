@@ -16,7 +16,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/todos', function(req, res) {
-	db.Todo.findAll().then(function(todos) {
+	db.todo.findAll().then(function(todos) {
 		if (todos) {
 			var queryParams = req.query;
 			var filteredTodos = todos;
@@ -74,32 +74,22 @@ app.get('/todos/:id', function(req, res) {
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed');
 
-	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-		return res.status(400).send();
-	}
-	body.description = body.description.trim();
-	//console.log('description: ' + body.description);
-	//res.json(body);
-	// body.id = todoNextId++;
-	//todos.push(body);
-
 	db.todo.create(body).then(function(todo) {
 		res.json(todo.toJSON());
-		return db.Todo.findAll();
-	}).then(function(todos) {
-		if (todos) {
-			todos.forEach(function(todo) {
-				console.log(todo.toJSON());
-			})
-		} else {
-			console.log('no todo found');
-		}
-	} ).catch(function(e) {
+	}, function(e) {
 		res.status(400).json(e);
-		console.log('Finished');
-		console.log(e);
 	});
 
+});
+
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+
+	db.user.create(body).then(function(user) {
+		res.json(user.toJSON());
+	}, function(e) {
+		res.status(400).json(e);
+	});
 
 });
 
